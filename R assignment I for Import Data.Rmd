@@ -1,0 +1,69 @@
+---
+title: "Import Data"
+author: "Jean de Dieu"
+date: "2026-05-05"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+install.packages("haven")
+library(haven)
+
+# Create a sample dataset
+datasample <- data.frame(
+  ID = 1:10,
+  Name = c("Jean", "Alice", "Bob", "David", "Emma", "Frank", "Grace", "Helen", "Ian", "Jane"),
+  Age = c(25, 30, 28, 35, 22, 40, 27, 33, 29, 31),
+  Salary = c(500, 600, 550, 700, 450, 800, 520, 680, 590, 610)
+)
+
+# View data
+print(datasample)
+
+write_sav(datasample, "datasample.sav")
+list.files()
+"datasample.sav"
+data_loaded <- read_sav("datasample.sav")
+
+head(data_loaded)
+write_sav(datasample, "C:/Users/jeandedieu.rwabukang/Documents/R Assignment for Import/datasample.sav")
+
+
+spss_data <- read_sav("C:/Users/jeandedieu.rwabukang/Documents/R Assignment for Import/datasample.sav")
+head(spss_data)
+
+
+# Create .dta file
+set.seed(123)
+n <- 100
+loan_data <- data.frame(
+  LoanID = 1001:(1000 + n),
+  ClientID = sample(2001:3000, n),
+  ClientName = paste("Client", 1:n),
+  Gender = sample(c("Male", "Female"), n, replace = TRUE),
+  Age = sample(21:65, n, replace = TRUE),
+  LoanAmount = round(runif(n, 500000, 20000000), 0),
+  InterestRate = round(runif(n, 10, 20), 2),
+  LoanTermMonths = sample(c(12, 24, 36, 48, 60), n, replace = TRUE),
+  LoanType = sample(c("Personal", "Mortgage", "Business", "Agriculture"), n, replace = TRUE),
+  DisbursementDate = sample(seq(as.Date("2023-01-01"), as.Date("2025-01-01"), by="day"), n, replace = TRUE),
+  Status = sample(c("Active", "Closed", "Defaulted", "Pending"), n, replace = TRUE),
+  CollateralValue = round(runif(n, 0, 30000000), 0)
+)
+loan_data$MonthlyInstallment <- round(
+  (loan_data$LoanAmount * (1 + loan_data$InterestRate/100)) / loan_data$LoanTermMonths,
+  0
+)
+head(loan_data)
+write_dta(loan_data, "loan_datasample.dta")
+list.files()
+stata_data <- read_dta("loan_datasample.dta")
+head(stata_data)
+write_dta(loan_data, "C:/Users/jeandedieu.rwabukang/Documents/R Assignment for Import/loan_datasample.dta")
+```
+
+
