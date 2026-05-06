@@ -64,6 +64,27 @@ list.files()
 stata_data <- read_dta("loan_datasample.dta")
 head(stata_data)
 write_dta(loan_data, "C:/Users/jeandedieu.rwabukang/Documents/R Assignment for Import/loan_datasample.dta")
+
+
+install.packages("DBI")
+install.packages("odbc")
+install.packages("RMySQL")
+install.packages("RPostgres")
+
+# Connect to Postgresql
+library(DBI)
+library(RPostgres)
+con_pg <- dbConnect(
+  RPostgres::Postgres(),
+  dbname = "employees",
+  host = "localhost",
+  user = "postgres",
+  password = "jado",
+  port = 5432
+)
+Credit_Data <- dbGetQuery(con_pg, "SELECT * FROM credit")
+head(Credit_Data)
+dbDisconnect(con_pg)
 ```
 
 
