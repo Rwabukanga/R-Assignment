@@ -56,6 +56,7 @@ str(population_data)
 boxplot(population_data[sapply(population_data, is.numeric)],
         main = "BoxPlot for Numeric Variables",
         las = 2)
+
 # Replace Missing numeriv values with Median
 population_data <- population_data %>%
   mutate(across(where(is.numeric),
@@ -99,4 +100,141 @@ summary(population_data$Population_2030)
 
 # Check actual column names
 names(population_data)
+
+
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+
+colnames(population_data)
+
+#Extract Top 10 Most Populous Countries in 2022
+top10_Population <- population_data %>%
+  arrange(desc(X2022.Population)) %>%
+  slice(1:10)
+top10_Population
+
+# Bar Plot of Top 10 Countries
+
+ggplot(top10_Population,
+       aes(x = reorder(Country.Territory, X2022.Population),
+           y = X2022.Population)) +
+  geom_col(fill = "steelblue") +
+  coord_flip() +
+  labs(
+    title = "Top 10 Most Populous Countries in 2022",
+    x = "Country",
+    y = "Population"
+  ) +
+  theme_minimal()
+# Population Trend from 1990–2022
+population_trend <- top10_Population %>%
+  select(Country.Territory,
+         X1990.Population,
+         X2000.Population,
+         X2010.Population,
+         X2020.Population,
+         X2022.Population) %>%
+  pivot_longer(
+    cols = starts_with("X"),
+    names_to = "Year",
+    values_to = "Population"
+  ) %>%
+  mutate(
+    Year = gsub("X", "", Year)
+  )
+
+population_trend
+
+#Line Plot for Population Trend
+ggplot(population_trend,
+       aes(x = Year,
+           y = Population,
+           color = Country.Territory,
+           group = Country.Territory)) +
+  geom_line(size = 1) +
+  geom_point() +
+  labs(
+    title = "Population Trend (1990–2022)",
+    x = "Year",
+    y = "Population"
+  ) +
+  theme_minimal()
+#CO2 Emission Trend for Top 10 Countries
+#Merge CO2 data with top population countries.
+top10_co2 <- co2_data %>%
+  filter(Country.Name %in% top10_Population$Country.Territory)
+
+head(top10_co2)
+#CO2 Emission Trend Plot (1990–2019)
+ggplot(top10_co2,
+       aes(x = X1990,
+           y = Region,
+           color = Country.Name,
+           group = Country.Name)) +
+  geom_line(size = 1) +
+  labs(
+    title = "CO2 Emission Trend (1990–2019)",
+    x = "Year",
+    y = "CO2 Emission"
+  ) +
+  theme_minimal()
+#4.5 Correlation Analysis
+
+#1. Correlation Between Variables
+correlation_data <- population_data %>%
+  select(
+    Growth.Rate,
+    World.Population.Percentage
+  )
+
+correlation_data
+
+#Correlation Matrix
+cor_matrix <- cor(correlation_data,
+                  use = "complete.obs")
+
+cor_matrix
+#Heatmap of Correlation
+
+install.packages("reshape2")
+library(reshape2)
+cor_melt <- melt(cor_matrix)
+ggplot(cor_melt,
+       aes(x = Var1,
+           y = Var2,
+           fill = value)) +
+  geom_tile() +
+  geom_text(aes(label = round(value, 2))) +
+  labs(title = "Correlation Heatmap") +
+  theme_minimal()
+#Merge Population and CO2 Datasets
+merged_data <- population_data %>%
+  select(Country.Territory, X2022.Population) %>%
+  inner_join(
+    co2_data %>%
+      select(Country.Name, `X2019`),
+    by = c("Country.Territory" = "Country.Name")
+  )
+
+head(merged_data)
+#Scatter Plot and Regression
+ggplot(merged_data,
+       aes(x = X2022.Population,
+           y = `X2019`)) +
+  geom_point(color = "blue") +
+  geom_smooth(method = "lm",
+              se = FALSE,
+              color = "red") +
+  labs(
+    title = "Population vs CO2 Emission",
+    x = "Population in 2022",
+    y = "CO2 Emission in 2019"
+  ) +
+  theme_minimal()
+#Linear Regression Model
+model <- lm(`X2019` ~ X2022.Population,
+            data = merged_data)
+
+summary(model)
 
