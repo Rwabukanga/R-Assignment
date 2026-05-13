@@ -1,0 +1,102 @@
+---
+title: "World Population and CO2 Analysis"
+author: "Jean de Dieu Rwabukanga"
+date: "2026-05-12"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Exploratory Data Analysis (EDA)
+# Load CSV files
+population_data <- read.csv("Assignment/world_population.csv")
+co2_data <- read.csv("Assignment/CO2_emission.csv")
+
+# View Data sets
+head(population_data)
+head(co2_data)
+
+# Load Libraries
+
+library(dplyr)
+
+# Display Variable names
+colnames(population_data)
+rownames(population_data)
+
+# Top 5 rows
+head(population_data, 5)
+
+# bottom 10 rows
+tail(population_data, 10)
+
+# shape of Data set
+dim(population_data)
+
+# Check duplicate rows
+Duplicate_rows <- sum(duplicated(population_data))
+head(Duplicate_rows)
+
+# Remove Duplicate
+population_data <- distinct(population_data)
+head(population_data)
+
+# missing value in each column
+missing_value_data <- colSums(is.na(population_data))
+head(missing_value_data)
+
+# Structure of Dataset
+str(population_data)
+
+# Box Plot for Quantitative Variables
+boxplot(population_data[sapply(population_data, is.numeric)],
+        main = "BoxPlot for Numeric Variables",
+        las = 2)
+# Replace Missing numeriv values with Median
+population_data <- population_data %>%
+  mutate(across(where(is.numeric),
+                ~ifelse(is.na(.), median(., na.rm = TRUE), .)))
+
+# Create the function
+remove_outliers <- function(x) {
+
+  Q1 <- quantile(x, 0.25, na.rm = TRUE)
+  Q3 <- quantile(x, 0.75, na.rm = TRUE)
+  IQR <- Q3 - Q1
+
+  x[x < (Q1 - 1.5 * IQR) | x > (Q3 + 1.5 * IQR)] <- NA
+
+  return(x)
+}
+
+# Apply function to numeric columns
+population_data[sapply(population_data, is.numeric)] <-
+  lapply(
+    population_data[sapply(population_data, is.numeric)],
+    remove_outliers
+  )
+
+summary(population_data)
+
+# Generating a New Variable Using World Population Dataset
+# View column names first
+colnames(population_data)
+
+# Create projected population for 2030
+population_data <- population_data %>%
+  mutate(
+    Population_2030 = X2022.Population * exp(Growth.Rate * 8)
+  )
+# View first rows
+head(population_data)
+
+# Summary of projected population
+summary(population_data$Population_2030)
+
+# Check actual column names
+names(population_data)
+

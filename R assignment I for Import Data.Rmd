@@ -91,6 +91,16 @@ install.packages("readxl", repos = "https://cloud.r-project.org")
 library(readxl)
 datainexcel <- read_excel("C:/Users/jeandedieu.rwabukang/Documents/R Assignment for Import/OpeningDate.xlsx")
 head(datainexcel)
+install.packages("tinytex")
+tinytex::install_tinytex()
+
+data("iris")
+head(iris)
+mean(iris$Petal.Length)
+mean(iris$Petal.Length[iris$Species=="setosa"])
+mean(iris$Petal.Length[iris$Species=="versicolor"])
+mean(iris$Petal.Length[iris$Species=="virginica"])
 ```
+
 
 
